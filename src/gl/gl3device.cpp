@@ -75,8 +75,10 @@ const char *shaderDecl120 =
 "#define VSOUT varying\n"
 "#define FSIN varying\n"
 "#define FRAGCOLOR(c) (gl_FragColor = c)\n";
-const char *shaderDecl330 =
-"#version 330\n"
+const char *shaderDecl320 =
+"#version 320 es\n"
+"precision mediump float;\n"
+"precision mediump usampler2D;\n"
 "#define VSIN(index) layout(location = index) in\n"
 "#define VSOUT out\n"
 "#define FSIN in\n"
@@ -1507,10 +1509,12 @@ openSDL2(EngineOpenParams *openparams)
 	memset(&gl3Caps, 0, sizeof(gl3Caps));
 
 	/* Init SDL */
-	if(SDL_InitSubSystem(SDL_INIT_VIDEO)){
+	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK)) {
 		RWERROR((ERR_GENERAL, SDL_GetError()));
 		return 0;
 	}
+
+	glGlobals.numMonitors = SDL_GetNumVideoDisplays();
 
 	makeVideoModeList(0);
 
@@ -1530,7 +1534,7 @@ static struct {
 } profiles[] = {
 	{ SDL_GL_CONTEXT_PROFILE_CORE, 3, 3 },
 	{ SDL_GL_CONTEXT_PROFILE_CORE, 2, 1 },
-	{ SDL_GL_CONTEXT_PROFILE_ES, 3, 1 },
+	{ SDL_GL_CONTEXT_PROFILE_ES, 3, 2 },
 	{ SDL_GL_CONTEXT_PROFILE_ES, 2, 0 },
 	{ 0, 0, 0 },
 };
@@ -1796,7 +1800,7 @@ initOpenGL(void)
 			shaderDecl = shaderDecl100es;
 	}else{
 		if(gl3Caps.glversion >= 30)
-			shaderDecl = shaderDecl330;
+			shaderDecl = shaderDecl320;
 		else
 			shaderDecl = shaderDecl120;
 	}
@@ -1928,18 +1932,36 @@ deviceSystemSDL2(DeviceReq req, void *arg, int32 n)
 	switch(req){
 	case DEVICEOPEN:
 		return openSDL2((EngineOpenParams*)arg);
+
 	case DEVICECLOSE:
 		return closeSDL2();
 
 	case DEVICEINIT:
 		return startSDL2() && initOpenGL();
+
 	case DEVICETERM:
 		return termOpenGL() && stopSDL2();
 
 	case DEVICEFINALIZE:
 		return finalizeOpenGL();
 
-	// TODO: implement subsystems
+	case DEVICEGETNUMSUBSYSTEMS:
+		return glGlobals.numMonitors;
+
+	case DEVICEGETCURRENTSUBSYSTEM:
+		return glGlobals.currentMonitor;
+
+	case DEVICESETSUBSYSTEM:
+		if(n >= glGlobals.numMonitors)
+			return 0;
+		glGlobals.currentMonitor = n;
+		return 1;
+
+	case DEVICEGETSUBSSYSTEMINFO:
+		if(n >= glGlobals.numMonitors)
+			return 0;
+		strncpy(((SubSystemInfo*)arg)->name, SDL_GetDisplayName(n), sizeof(SubSystemInfo::name));
+		return 1;
 
 	case DEVICEGETNUMVIDEOMODES:
 		return glGlobals.numModes;

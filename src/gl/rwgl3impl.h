@@ -42,12 +42,11 @@ struct GlGlobals
 #else
 	GLFWwindow **pWindow;
 	GLFWwindow *window;
-
 	GLFWmonitor *monitor;
-	int numMonitors;
-	int currentMonitor;
 #endif
 
+	int numMonitors;
+	int currentMonitor;
 	DisplayMode *modes;
 	int numModes;
 	int currentMode;
