@@ -57,6 +57,11 @@ if(NOT COMMAND librw_platform_target)
     endfunction()
 endif()
 
+option(LIBRW_FORCE_GLES "Force GLES context" OFF)
+if(LIBRW_FORCE_GLES)
+	add_compile_definitions(LIBRW_FORCE_GLES)
+endif()
+
 include(CMakeDependentOption)
 
 option(LIBRW_TOOLS "Build librw tools" ${librw_MAINPROJECT})

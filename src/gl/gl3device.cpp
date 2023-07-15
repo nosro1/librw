@@ -1532,8 +1532,10 @@ static struct {
 	int gl;
 	int major, minor;
 } profiles[] = {
+#ifndef LIBRW_FORCE_GLES
 	{ SDL_GL_CONTEXT_PROFILE_CORE, 3, 3 },
 	{ SDL_GL_CONTEXT_PROFILE_CORE, 2, 1 },
+#endif
 	{ SDL_GL_CONTEXT_PROFILE_ES, 3, 2 },
 	{ SDL_GL_CONTEXT_PROFILE_ES, 2, 0 },
 	{ 0, 0, 0 },
@@ -1566,7 +1568,7 @@ startSDL2(void)
 				SDL_SetWindowDisplayMode(win, NULL);
 		}
 		if(win){
-			gl3Caps.gles = profiles[i].gl == SDL_GL_CONTEXT_PROFILE_ES;
+			gl3Caps.gles = (profiles[i].gl == SDL_GL_CONTEXT_PROFILE_ES);
 			gl3Caps.glversion = profiles[i].major*10 + profiles[i].minor;
 			break;
 		}
