@@ -62,6 +62,10 @@ if(LIBRW_FORCE_GLES)
 	add_compile_definitions(LIBRW_FORCE_GLES)
 endif()
 
+if(CMAKE_BUILD_TYPE MATCHES "Release")
+    add_compile_options(-ftree-vectorize -ffast-math)
+endif()
+
 include(CMakeDependentOption)
 
 option(LIBRW_TOOLS "Build librw tools" ${librw_MAINPROJECT})
